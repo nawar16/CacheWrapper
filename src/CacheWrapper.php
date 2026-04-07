@@ -1,6 +1,6 @@
 <?php
 
-namespace nawar16\CacheWrapper;
+namespace Nawar16\CacheWrapper;
 
 class CacheWrapper
 {

@@ -1,1 +1,1 @@
-{"version":2,"defects":{"CacheWrapperTest::test_it_stores_and_returns_value":8},"times":{"CacheWrapperTest::test_it_stores_and_returns_value":0.023}}
+{"version":2,"defects":{"CacheWrapperTest::test_it_stores_and_returns_value":8},"times":{"CacheWrapperTest::test_it_stores_and_returns_value":0.007}}

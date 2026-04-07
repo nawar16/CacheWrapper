@@ -1,7 +1,7 @@
 <?php
 
 use PHPUnit\Framework\TestCase;
-use nawar16\CacheWrapper\CacheWrapper;
+use Nawar16\CacheWrapper\CacheWrapper;
 
 class CacheWrapperTest extends TestCase
 {
