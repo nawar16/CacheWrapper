@@ -13,6 +13,6 @@ class CacheWrapperTest extends TestCase
             return 'hello';
         });
 
-        $this->assertEquals('hello1', $result);
+        $this->assertEquals('hello', $result);
     }
 }
