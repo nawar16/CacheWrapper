@@ -1,0 +1,16 @@
+{
+    "name": "nawar16/cache-wrapper",
+    "description": "Simple cache layer for laravel",
+    "autoload": {
+        "psr-4": {
+            "Nawar16\\CacheWrapper\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "nawar16",
+            "email": "nawarmk98@gmail.com"
+        }
+    ],
+    "require": {}
+}
