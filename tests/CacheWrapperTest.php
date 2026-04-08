@@ -1,10 +1,15 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+use Orchestra\Testbench\TestCase;
 use Nawar16\CacheWrapper\CacheWrapper;
 
 class CacheWrapperTest extends TestCase
 {
+    protected function getEnvironmentSetUp($app)
+    {
+        $app['config']->set('cache.default', 'array');
+    }
+
     public function test_it_stores_and_returns_value()
     {
         $cache = new CacheWrapper();
