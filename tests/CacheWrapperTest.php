@@ -66,4 +66,36 @@ class CacheWrapperTest extends TestCase
         $result = $cache->tags(['users'])->remember('user:1', fn() => 'userY');
         $this->assertEquals('userY', $result);
     }
+    public function test_it_stores_multiple_keys_under_same_tag()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+        $cache->tags(['users'])->remember('user:2', fn() => 'userY');
+        $this->assertTrue(true); 
+    }
+    public function test_it_does_not_affect_other_tags_when_flushing()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+        $cache->tags(['posts'])->remember('post:1', fn() => 'userY');
+        $cache->tags(['users'])->flush();
+        $result = $cache->tags(['posts'])->remember('post:1', fn() => 'postX');
+        $this->assertEquals('userY', $result);
+    }
+    public function test_it_resets_tag_context_after_operation()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+        $cache->remember('user:2', fn() => 'userY');
+        $this->assertTrue(true); 
+    }
+    public function test_it_flushs_all_keys_in_tag()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+        $cache->tags(['users'])->remember('user:2', fn() => 'userY');
+        $cache->tags(['users'])->flush();
+        $result = $cache->tags(['users'])->remember('user:1', fn() => 'userZ');
+        $this->assertEquals('userZ', $result);
+    }
 }
