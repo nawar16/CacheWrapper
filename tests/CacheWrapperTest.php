@@ -58,4 +58,12 @@ class CacheWrapperTest extends TestCase
         $result = $cache->remember('xkey', fn() => 'newXVal');
         $this->assertEquals('newXVal', $result);
     }
+    public function test_it_stores_and_flushs_by_tags()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+        $cache->tags(['users'])->flush();
+        $result = $cache->tags(['users'])->remember('user:1', fn() => 'userY');
+        $this->assertEquals('userY', $result);
+    }
 }
