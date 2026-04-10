@@ -98,4 +98,13 @@ class CacheWrapperTest extends TestCase
         $result = $cache->tags(['users'])->remember('user:1', fn() => 'userZ');
         $this->assertEquals('userZ', $result);
     }
+    public function test_it_tracks_cache_hits_and_misses()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->remember('key', fn() => 'value'); 
+        $cache->remember('key', fn() => 'value'); 
+        $stats = $cache->stats();
+        $this->assertEquals(1, $stats['misses']);
+        $this->assertEquals(1, $stats['hits']);
+    }
 }

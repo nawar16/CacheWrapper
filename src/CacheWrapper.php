@@ -9,6 +9,10 @@ class CacheWrapper
     private array $ttls = [];
     private array $tags = [];
     private array $tagMap = [];
+    private array $stats = [
+        'hits' => 0,
+        'misses' => 0
+    ];
 
     public function getTtl(string $key): int
     {
@@ -25,14 +29,28 @@ class CacheWrapper
         $this->tags = $tags;
         return $this;
     }
+    public function stats(): array
+    {
+        return $this->stats;
+    }
     public function remember(string $key, callable $callback)
     {
         $this->usage[$key] = ($this->usage[$key] ?? 0) + 1;
         $ttl = $this->calculateTtl($key);
         $this->ttls[$key] = $ttl;
+        if (Cache::has($key)) {
+            $this->stats['hits']++;
+        } else {
+            $this->stats['misses']++;
+        }
         if (!empty($this->tags)) {
             foreach ($this->tags as $tag) {
-                $this->tagMap[$tag][] = $key;
+                if (!isset($this->tagMap[$tag])) {
+                    $this->tagMap[$tag] = [];
+                }
+                if (!in_array($key, $this->tagMap[$tag])) {
+                    $this->tagMap[$tag][] = $key;
+                }
             }
         }
         $this->tags = [];
