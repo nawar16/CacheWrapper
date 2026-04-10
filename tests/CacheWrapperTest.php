@@ -107,4 +107,10 @@ class CacheWrapperTest extends TestCase
         $this->assertEquals(1, $stats['misses']);
         $this->assertEquals(1, $stats['hits']);
     }
+    public function test_get_metrics()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $result = $cache->getMetrics();
+        $this->assertTrue($result);
+    }
 }

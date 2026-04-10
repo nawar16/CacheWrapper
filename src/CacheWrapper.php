@@ -33,6 +33,25 @@ class CacheWrapper
     {
         return $this->stats;
     }
+    public function exportMetrics(): array
+    {
+        return [
+            'hits' => $this->stats['hits'],
+            'misses' => $this->stats['misses'],
+            'usage' => $this->usage,
+            'ttls' => $this->ttls
+        ];
+    }
+    public function getMetrics(): bool
+    {
+        $metrics = $this->exportMetrics();
+        //TODO: make it a request
+        file_put_contents(
+            storage_path('cache_metrics.json'),
+            json_encode($metrics, JSON_PRETTY_PRINT)
+        );
+        return true;
+    }
     public function remember(string $key, callable $callback)
     {
         $this->usage[$key] = ($this->usage[$key] ?? 0) + 1;
