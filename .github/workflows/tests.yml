@@ -22,15 +22,15 @@ jobs:
       - name: Build and start Docker containers
         run: docker compose up -d --build
 
-      - name: Wait for Redis
-        run: sleep 10
+      - name: Wait for services to be healthy
+        run: docker compose up -d --wait
 
       - name: Set Redis config
         run: |
           echo "REDIS_HOST=redis" >> $GITHUB_ENV
 
-      - name: Run tests inside container
-        run: docker compose exec app vendor/bin/phpunit
+      - name: Run tests
+        run: docker compose run --rm app vendor/bin/phpunit
 
       - name: Tear down Docker containers
         run: docker compose down
