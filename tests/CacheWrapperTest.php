@@ -113,4 +113,28 @@ class CacheWrapperTest extends TestCase
         $result = $cache->getMetrics();
         $this->assertTrue($result);
     }
+    public function test_it_compresses_large_cache_values()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $largeData = str_repeat('bla', 60000); 
+        $cache->remember('largeKey', fn() => $largeData);
+        $stored = $cache->getRaw('largeKey');
+        $this->assertTrue($stored !== $largeData);
+    }
+    public function test_it_does_not_compress_small_values()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $smallData = 'small';
+        $cache->remember('smallKey', fn() => $smallData);
+        $raw = $cache->getRaw('smallKey');
+        $this->assertEquals($smallData, $raw);
+    }
+    public function test_it_decompresses_large_values_correctly()
+    {
+        $cache = $this->app->make(CacheWrapper::class);
+        $largeData = str_repeat('bla', 60000);
+        $result = $cache->remember('largeKey', fn() => $largeData);
+        $this->assertEquals($largeData, $result);
+    }
+
 }
