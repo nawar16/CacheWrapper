@@ -30,6 +30,15 @@ class CacheWrapperTest extends TestCase
            CacheWrapperServiceProvider::class
         ];
     }
+    protected function checkRedisAvailability(): bool
+    {
+        try {
+            Redis::ping();
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
     public function test_it_stores_and_returns_value()
     {
         $cache = new CacheWrapper();
@@ -162,10 +171,11 @@ class CacheWrapperTest extends TestCase
     }
     public function test_it_stores_keys_in_redis_tags()
     {
-        if (!extension_loaded(Redis::class)) {
+        if (!$this->checkRedisAvailability()) {
             $this->markTestSkipped('Redis not available');
         }
 
+        config(['CacheWrapper.use_redis_tags' => true]);
         $cache = $this->app->make(CacheWrapper::class);
         $cache->tags(['users'])->remember('user:1', fn() => 'userX');
         $keys = Redis::smembers('tag:users');
@@ -173,10 +183,11 @@ class CacheWrapperTest extends TestCase
     }
     public function test_it_flushes_redis_tagged_keys()
     {
-        if (!extension_loaded(Redis::class)) {
+        if (!$this->checkRedisAvailability()) {
             $this->markTestSkipped('Redis not available');
         }
 
+       config(['CacheWrapper.use_redis_tags' => true]);
        $cache = $this->app->make(CacheWrapper::class);
        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
        $cache->tags(['users'])->flush();
