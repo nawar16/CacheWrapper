@@ -3,9 +3,14 @@
 use Orchestra\Testbench\TestCase;
 use Nawar16\CacheWrapper\CacheWrapper;
 use Nawar16\CacheWrapper\CacheWrapperServiceProvider;
+use Nawar16\CacheWrapper\tests\Models\TestUser;
 
 class CacheWrapperTest extends TestCase
 {
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadLaravelMigrations();
+    }
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('cache.default', 'array');
@@ -136,5 +141,15 @@ class CacheWrapperTest extends TestCase
         $result = $cache->remember('largeKey', fn() => $largeData);
         $this->assertEquals($largeData, $result);
     }
-
+    public function test_cache_macro_is_registered()
+    {
+        $this->assertTrue(\Illuminate\Database\Eloquent\Builder::hasMacro('cache'));
+    }
+    public function test_cache_wrapper_caches_query_results()
+    {
+        $first = TestUser::query()->cache()->all();
+        $second = TestUser::query()->cache()->all();
+        $this->assertEquals($first, $second);
+    }
 }
+

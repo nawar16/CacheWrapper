@@ -24,7 +24,7 @@ class CacheWrapperServiceProvider extends ServiceProvider
 
     public function register()
     {
-        $this->app->singleton(CacheWrapper::class, function () {
+        $this->app->singleton('cache-wrapper', function () {
             return new CacheWrapper();
         });
         $this->mergeConfigFrom(

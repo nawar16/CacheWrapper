@@ -6,6 +6,11 @@
             "Nawar16\\CacheWrapper\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Nawar16\\CacheWrapper\\tests\\": "tests/"
+        }
+    },
     "authors": [
         {
             "name": "nawar16",
