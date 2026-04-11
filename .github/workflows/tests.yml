@@ -25,8 +25,11 @@ jobs:
           sleep 10
 
       - name: Install Composer dependencies inside container
-        run: docker compose exec app composer install --no-interaction --prefer-dist
+        run: docker compose exec app composer install --no-interaction --prefer-dist --no-cache
 
+      - name: Verify Predis installed
+        run: docker compose exec app php -r "var_dump(class_exists('Predis\\Client'));"
+      
       - name: Test Redis connection
         run: docker compose exec app php -r "var_dump((new Predis\Client(['host' => 'redis']))->ping());"
       
