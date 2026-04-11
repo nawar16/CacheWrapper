@@ -2,6 +2,7 @@
 
 namespace Nawar16\CacheWrapper;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class CacheWrapper
 {
@@ -14,6 +15,11 @@ class CacheWrapper
         'misses' => 0
     ];
 
+    private function canUseRedis(): bool
+    {
+        return config('CacheWrapper.use_redis_tags')
+            && class_exists(Redis::class);
+    }
     public function getTtl(string $key): int
     {
         return $this->ttls[$key] ?? 60;
@@ -82,11 +88,15 @@ class CacheWrapper
         }
         if (!empty($this->tags)) {
             foreach ($this->tags as $tag) {
-                if (!isset($this->tagMap[$tag])) {
-                    $this->tagMap[$tag] = [];
-                }
-                if (!in_array($key, $this->tagMap[$tag])) {
-                    $this->tagMap[$tag][] = $key;
+                if ($this->canUseRedis()) {
+                    Redis::sadd("tag:$tag", $key);
+                } else {
+                    if (!isset($this->tagMap[$tag])) {
+                        $this->tagMap[$tag] = [];
+                    }
+                    if (!in_array($key, $this->tagMap[$tag])) {
+                        $this->tagMap[$tag][] = $key;
+                    }
                 }
             }
         }
@@ -116,17 +126,23 @@ class CacheWrapper
     {
         if (!empty($this->tags)) {
             foreach ($this->tags as $tag) {
-                if (isset($this->tagMap[$tag])) {
-                    foreach ($this->tagMap[$tag] as $key) {
+                if ($this->canUseRedis()) {
+                    $keys = Redis::smembers("tag:$tag");
+                    foreach ($keys as $key) {
                         Cache::forget($key);
                     }
+                    Redis::del("tag:$tag");
+                } else {
+                    if (isset($this->tagMap[$tag])) {
+                        foreach ($this->tagMap[$tag] as $key) {
+                            Cache::forget($key);
+                        }
+                        unset($this->tagMap[$tag]);
+                    }
                 }
-                unset($this->tagMap[$tag]);
             }
             return true;
         }
-        $this->usage = [];
-        $this->ttls = [];
         return Cache::flush();
     }
 }

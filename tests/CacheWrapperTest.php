@@ -5,9 +5,17 @@ use Nawar16\CacheWrapper\CacheWrapper;
 use Nawar16\CacheWrapper\CacheWrapperServiceProvider;
 use Nawar16\CacheWrapper\tests\Models\TestUser;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Cache;
 
 class CacheWrapperTest extends TestCase
 {
+    protected function getPackageAliases($app)
+    {
+        return [
+            'Redis' => \Illuminate\Support\Facades\Redis::class
+        ];
+    }
     protected function defineDatabaseMigrations()
     {
         $this->loadLaravelMigrations();
@@ -152,5 +160,28 @@ class CacheWrapperTest extends TestCase
         $second = TestUser::query()->cache()->all();
         $this->assertEquals($first, $second);
     }
+    public function test_it_stores_keys_in_redis_tags()
+    {
+        if (!extension_loaded(Redis::class)) {
+            $this->markTestSkipped('Redis not available');
+        }
+
+        $cache = $this->app->make(CacheWrapper::class);
+        $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+        $keys = Redis::smembers('tag:users');
+        $this->assertContains('user:1', $keys);
+    }
+    public function test_it_flushes_redis_tagged_keys()
+    {
+        if (!extension_loaded(Redis::class)) {
+            $this->markTestSkipped('Redis not available');
+        }
+
+       $cache = $this->app->make(CacheWrapper::class);
+       $cache->tags(['users'])->remember('user:1', fn() => 'userX');
+       $cache->tags(['users'])->flush();
+       $this->assertNull(Cache::get('user:1'));
+    }
+    
 }
 
