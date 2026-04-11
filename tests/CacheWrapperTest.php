@@ -4,6 +4,7 @@ use Orchestra\Testbench\TestCase;
 use Nawar16\CacheWrapper\CacheWrapper;
 use Nawar16\CacheWrapper\CacheWrapperServiceProvider;
 use Nawar16\CacheWrapper\tests\Models\TestUser;
+use Illuminate\Database\Eloquent\Builder;
 
 class CacheWrapperTest extends TestCase
 {
@@ -143,7 +144,7 @@ class CacheWrapperTest extends TestCase
     }
     public function test_cache_macro_is_registered()
     {
-        $this->assertTrue(\Illuminate\Database\Eloquent\Builder::hasMacro('cache'));
+        $this->assertTrue(Builder::hasGlobalMacro('cache'));
     }
     public function test_cache_wrapper_caches_query_results()
     {
