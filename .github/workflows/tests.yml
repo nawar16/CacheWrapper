@@ -13,28 +13,30 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
       - name: Build and start Docker containers
         run: docker compose up -d --build
 
-      - name: Wait for services
+      - name: Wait for Redis
+        run: sleep 10
+
+      - name: Set Redis config
         run: |
-          echo "Waiting 5 seconds for Redis"
-          sleep 10
+          echo "REDIS_HOST=redis" >> $GITHUB_ENV
 
-      - name: Install Composer dependencies inside container
-        run: docker compose exec app composer install --no-interaction --prefer-dist --no-cache
-
-      - name: Verify Predis installed
-        run: docker compose exec app php -r "var_dump(class_exists('Predis\\Client'));"
-      
-      - name: Test Redis connection
-        run: docker compose exec app php -r "var_dump((new Predis\Client(['host' => 'redis']))->ping());"
-      
       - name: Run tests inside container
         run: docker compose exec app vendor/bin/phpunit
 
       - name: Tear down Docker containers
         run: docker compose down
+
+
+
+
+
+
