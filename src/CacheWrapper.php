@@ -52,6 +52,24 @@ class CacheWrapper
         );
         return true;
     }
+    private function shouldCompress($value): bool
+    {
+        return strlen(serialize($value)) > config('CacheWrapper.compression_threshold');
+    }
+    
+    private function compress($value): string
+    {
+        return gzcompress(serialize($value));
+    }
+    
+    private function decompress($value)
+    {
+        return unserialize(gzuncompress($value));
+    }
+    public function getRaw(string $key)
+    {
+        return Cache::get($key);
+    }
     public function remember(string $key, callable $callback)
     {
         $this->usage[$key] = ($this->usage[$key] ?? 0) + 1;
@@ -73,7 +91,20 @@ class CacheWrapper
             }
         }
         $this->tags = [];
-        return Cache::remember($key, $ttl, $callback);
+        $val = Cache::remember($key, $ttl, function () use ($callback, $key) {
+            $result = $callback();
+            if ($this->shouldCompress($result)) {
+                return [
+                    '__compressed' => true,
+                    'data' => $this->compress($result)
+                ];
+            }
+            return $result;
+        });
+        if (is_array($val) && isset($val['__compressed'])) {
+            $val = $this->decompress($val['data']);
+        }
+        return $val;
     }
     public function forget(string $key): bool
     {
