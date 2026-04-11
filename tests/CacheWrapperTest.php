@@ -13,7 +13,7 @@ class CacheWrapperTest extends TestCase
     protected function getPackageAliases($app)
     {
         return [
-            'Redis' => \Illuminate\Support\Facades\Redis::class
+            'Redis' => Redis::class
         ];
     }
     protected function defineDatabaseMigrations()
@@ -23,6 +23,7 @@ class CacheWrapperTest extends TestCase
     protected function getEnvironmentSetUp($app)
     {
         $app['config']->set('cache.default', 'array');
+        $app['config']->set('database.redis.default.host', 'redis');
     }
     protected function getPackageProviders($app)
     {
@@ -33,7 +34,7 @@ class CacheWrapperTest extends TestCase
     protected function checkRedisAvailability(): bool
     {
         try {
-            Redis::ping();
+            Redis::connection()->ping();
             return true;
         } catch (\Exception $e) {
             return false;
